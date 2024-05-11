@@ -19,7 +19,7 @@ const gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
     numHands: 2,
   },
   //
-  runningMode: "VIDEO",
+  runningMode: "LIVE_STREAM",
   numHands: 2,
   minHandDetectionConfidence: 0.6,
 });

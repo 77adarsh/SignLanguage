@@ -4,6 +4,7 @@ import {
   DrawingUtils,
   HandLandmarkConnections,
 } from "./gesture.js";
+import { formatScore } from "./utils.js";
 
 import { useRef } from "react";
 import "./gr.css";
@@ -13,10 +14,8 @@ const GestureRecognizer = () => {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [lastVideoTime, setLastVideoTime] = useState(-1);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   const processVideo = async () => {
-    console.dir(gestureRecognizer);
     const videoElement = videoRef.current;
     const canvasElement = canvasRef.current;
     const webcam = document.getElementById("webcam");
@@ -54,9 +53,16 @@ const GestureRecognizer = () => {
         }
       }
       canvasCtx.restore();
-      if (results.gestures && results.gestures.length > 0) {
+      if (
+        results.gestures &&
+        results.gestures.length > 0 &&
+        results.gestures[0][0].categoryName != ""
+      ) {
         document.querySelector(".res").innerHTML =
           results.gestures[0][0].categoryName;
+        document.querySelector(".score").innerHTML = formatScore(
+          results.gestures[0][0].score
+        );
       }
       requestAnimationFrame(() => {
         renderLoop();
@@ -65,23 +71,14 @@ const GestureRecognizer = () => {
     renderLoop();
   };
 
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: false,
-      })
-      .then((stream) => {
-        videoElement.srcObject = stream;
-        videoElement.onloadedmetadata = () => {
-          videoElement.play();
-          videoElement.addEventListener("loadeddata", processVideo);
-        };
-      });
-  }, []);
 
-  return <LiveCam videoRef={videoRef} canvasRef={canvasRef} />;
+  return (
+    <LiveCam
+      videoRef={videoRef}
+      canvasRef={canvasRef}
+      processVideo={processVideo}
+    />
+  );
 };
 
 export default GestureRecognizer;

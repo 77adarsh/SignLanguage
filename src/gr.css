@@ -1,6 +1,5 @@
 * {
-  height: 100%;
-  position: absolute;
+  /* position: absolute; */
   width: 100%;
   overflow: hidden;
   box-sizing: border-box;
@@ -81,6 +80,7 @@
 }
 
 .c {
+  position: absolute;
   width: 30%;
   height: 15%;
   bottom: 0;
@@ -104,26 +104,45 @@
 
 .pred {
   width: 30%;
-  height: 30%;
+  height: 12rem;
   position: absolute;
   right: 0;
-  bottom: 0;
+  bottom: 15px;
   background-image: url("./assests/predBlock.png");
   background-size: 100%;
   background-repeat: no-repeat;
+  background-position: center;
   text-align: center;
   display: flex;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.66);
 }
 
 .pred span {
-  color: rgba(13, 229, 49, 0.943);
+  color: rgba(128, 0, 255, 0.943);
   width: 100%;
+  position: absolute;
+  top: calc(50% - 1.5rem);
+  text-align: center;
   height: fit-content;
+  font-weight: 600;
+  font-size: 3rem;
+}
+
+.pred span.score {
+  position: absolute;
+  color: rgb(255, 255, 255);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  top: 15px;
+  left: 15px !important;
+  display: inline;
+  text-align: left;
 }
 
 video {
-  filter: brightness(120%) contrast(150%) saturate(150%);
+  /* filter: brightness(110%) contrast(200%) saturate(110%); */
   border-radius: 10px;
   box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
   object-fit: fill;

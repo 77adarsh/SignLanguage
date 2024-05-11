@@ -1,10 +1,24 @@
 import React, { useEffect } from "react";
 import "./gr.css";
 
-const LiveCam = ({ videoRef, canvasRef }) => {
+const LiveCam = ({ videoRef, canvasRef, processVideo }) => {
   useEffect(() => {
-    videoRef.current.width = canvasRef.current.width;
+    const videoElement = videoRef.current;
+    navigator.mediaDevices
+      .getUserMedia({
+        video: true,
+        audio: false,
+      })
+      .then((stream) => {
+        videoElement.srcObject = stream;
+        videoElement.onloadedmetadata = () => {
+          videoElement.play();
+          videoElement.addEventListener("loadeddata", processVideo);
+        };
+      });
   }, []);
+
+
   return (
     <div id="webcam-container">
       <div className="u-r-1"></div>
@@ -13,10 +27,10 @@ const LiveCam = ({ videoRef, canvasRef }) => {
       <div className="c"></div>
       <div id="webcam">
         <video id="video" autoPlay ref={videoRef}></video>
-        <canvas id="canvas" ref={canvasRef}></canvas>
+        {canvasRef && <canvas id="canvas" ref={canvasRef}></canvas>}
         <div className="pred">
           {" "}
-          <span className="res">Hi</span>{" "}
+          <span className="res">Hi</span> <span className="score">0.00</span>
         </div>
       </div>
     </div>

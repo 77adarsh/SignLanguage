@@ -13,3 +13,7 @@ export function captureCurrentFrame(videoElement) {
   // Convert the canvas to a data URL (base64 encoded image)
   return canvas.toDataURL("image/png");
 }
+
+export function formatScore(score) {
+  return Math.floor(parseFloat(score) * 10000) / 100 + "%";
+}

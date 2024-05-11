@@ -15,10 +15,23 @@ export async function postImage(image) {
         },
       }
     );
+
+    console.log(response);
     if (response.status !== 200) throw new Error("Failiure");
     return response.data;
   } catch (error) {
     return null;
+  }
+}
+
+export async function testServer() {
+  try {
+    const response = await axios.get("https://isl-serv.onrender.com/");
+    console.log(response.data);
+    if (response.status === 200 && response.data === "hi") return true;
+    return false;
+  } catch (err) {
+    return false;
   }
 }
 
