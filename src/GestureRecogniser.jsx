@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   gestureRecognizer,
   DrawingUtils,
@@ -14,6 +14,7 @@ const GestureRecognizer = () => {
   const videoRef = useRef();
   const canvasRef = useRef();
   const [lastVideoTime, setLastVideoTime] = useState(-1);
+  const [error, setError] = useState(null);
 
   const processVideo = async () => {
     const videoElement = videoRef.current;
@@ -31,52 +32,58 @@ const GestureRecognizer = () => {
 
     function renderLoop() {
       let nowInMs = Date.now();
-      if (videoElement.currentTime !== lastVideoTime) {
-        setLastVideoTime(videoElement.currentTime);
-        results = gestureRecognizer.recognizeForVideo(videoElement, nowInMs);
-      }
-
-      canvasCtx.save();
-      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-      const drawingUtils = new DrawingUtils(canvasCtx);
-
-      if (results.landmarks) {
-        for (const landmarks of results.landmarks) {
-          drawingUtils.drawConnectors(landmarks, HandLandmarkConnections, {
-            color: "red",
-            lineWidth: 2,
-          });
-          drawingUtils.drawLandmarks(landmarks, {
-            color: "white",
-            radius: 1,
-          });
+      try {
+        setError(null);
+        if (videoElement.currentTime !== lastVideoTime) {
+          setLastVideoTime(videoElement.currentTime);
+          results = gestureRecognizer.recognizeForVideo(videoElement, nowInMs);
         }
+
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        const drawingUtils = new DrawingUtils(canvasCtx);
+
+        if (results.landmarks) {
+          for (const landmarks of results.landmarks) {
+            drawingUtils.drawConnectors(landmarks, HandLandmarkConnections, {
+              color: "red",
+              lineWidth: 2,
+            });
+            drawingUtils.drawLandmarks(landmarks, {
+              color: "white",
+              radius: 1,
+            });
+          }
+        }
+        canvasCtx.restore();
+        if (
+          results.gestures &&
+          results.gestures.length > 0 &&
+          results.gestures[0][0].categoryName !== ""
+        ) {
+          document.querySelector(".res").innerHTML =
+            results.gestures[0][0].categoryName;
+          document.querySelector(".score").innerHTML = formatScore(
+            results.gestures[0][0].score
+          );
+        }
+      } catch (error) {
+        setError(error);
+      } finally {
+        requestAnimationFrame(() => {
+          renderLoop();
+        });
       }
-      canvasCtx.restore();
-      if (
-        results.gestures &&
-        results.gestures.length > 0 &&
-        results.gestures[0][0].categoryName != ""
-      ) {
-        document.querySelector(".res").innerHTML =
-          results.gestures[0][0].categoryName;
-        document.querySelector(".score").innerHTML = formatScore(
-          results.gestures[0][0].score
-        );
-      }
-      requestAnimationFrame(() => {
-        renderLoop();
-      });
     }
     renderLoop();
   };
-
 
   return (
     <LiveCam
       videoRef={videoRef}
       canvasRef={canvasRef}
       processVideo={processVideo}
+      error={error}
     />
   );
 };

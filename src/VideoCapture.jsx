@@ -1,11 +1,12 @@
 import "./App.css";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { postImage, controller, testServer } from "./services";
 import LiveCam from "./LiveCam";
 
 function VideoCapture() {
   const videoRef = useRef(null);
   const canvasRef = useRef(document.createElement("canvas"));
+  const [error, setError] = useState(null);
 
   function recallCaptureAfter1s() {
     return new Promise((resolve, reject) => {
@@ -26,7 +27,7 @@ function VideoCapture() {
     await canvas.toBlob(async (blob) => {
       try {
         const response = await postImage(blob);
-        if (!response || response.statuscode == 400) return res;
+        if (!response || response.statuscode === 400) return res;
         for (let i = 0; i < 3; i++) {
           const predClass = response["class"][i];
           const predProb = response["prob"][i];
@@ -52,35 +53,46 @@ function VideoCapture() {
   }
 
   const captureImage = async () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
+    try {
+      setError(null);
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const context = canvas.getContext("2d");
 
-    video.currentTime = new Date();
+      video.currentTime = new Date();
 
-    // Apply constraints to the video track to set the frame rate
-    const stream = video.srcObject;
-    const videoTrack = stream.getVideoTracks()[0];
-    await videoTrack.applyConstraints({ frameRate: 30 }); // Set the desired frame rate
+      // Apply constraints to the video track to set the frame rate
+      const stream = video.srcObject;
+      const videoTrack = stream.getVideoTracks()[0];
+      await videoTrack.applyConstraints({ frameRate: 30 }); // Set the desired frame rate
 
-    await processImage(context, video, canvas);
-
-    await recallCaptureAfter1s();
-  };
-
-  const connectServer = async () => {
-    console.log('connect called');
-    const testConnection = await testServer();
-    if (testConnection) {
-      console.log("Connected to server");
-      captureImage();
-    } else {
-      console.log("cannot connect to server");
-      controller.abort();
+      await processImage(context, video, canvas);
+    } catch (error) {
+      setError(error);
+    } finally {
+      await recallCaptureAfter1s();
     }
   };
 
-  return <LiveCam videoRef={videoRef} processVideo={connectServer} />;
+  const connectServer = async () => {
+    try {
+      console.log("connect called");
+      const testConnection = await testServer();
+      if (testConnection) {
+        console.log("Connected to server");
+        captureImage();
+      } else {
+        console.log("cannot connect to server");
+        controller.abort();
+      }
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  return (
+    <LiveCam videoRef={videoRef} processVideo={connectServer} error={error} />
+  );
 }
 
 export default VideoCapture;

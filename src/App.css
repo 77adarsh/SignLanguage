@@ -71,3 +71,26 @@ body {
 video {
   transform: rotateY(180deg);
 }
+
+#spinner1 {
+  height: 100px;
+  width: 100px;
+  border: solid 10px #278ae7;
+  text-align: center;
+  justify-content: center;
+  border-bottom: solid 10px white;
+  margin: auto;
+  position: relative;
+  top: calc(50% - 50px);
+  left: calc(50% - 50px);
+  border-radius: 50%;
+  display: inline-block;
+  z-index: 10;
+  animation: spin 1s infinite linear 0s;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
